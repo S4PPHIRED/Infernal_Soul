@@ -10,4 +10,4 @@ This will be the first version to be released!
 •It will have graphics, but for now it's only drawn in 32 pixels.
 
 •Its fighting style is inspired by games like Metal Slug and Cuphead; for now, it will only be a platformer
-and when you fight bosses, you can be in a hit and run mode or boss rush mode.  :⁠^)
+and when you fight bosses, you can be in a hit and run mode or boss rush mode.   :⁠^)
