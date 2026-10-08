@@ -1,0 +1,17 @@
+name: Discord Update
+
+on:
+  push:
+    paths:
+      - "README.md"
+
+jobs:
+  discord:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Enviar mensaje a Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d '{"content":"📢 The message on GitHub has been updated!"}' \
+          "${{ secrets.DISCORD_WEBHOOK }}"
