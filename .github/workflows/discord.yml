@@ -21,6 +21,7 @@ jobs:
           import os
           import json
           import urllib.request
+          import urllib.error
 
           webhook = os.environ["DISCORD_WEBHOOK"]
           roadmap = open("RoadMap.md", encoding="utf-8").read()
@@ -42,5 +43,11 @@ jobs:
               method="POST"
           )
 
-          urllib.request.urlopen(request)
+          try:
+              with urllib.request.urlopen(request) as response:
+                  print("Discord response:", response.status)
+          except urllib.error.HTTPError as error:
+              print("Discord error:", error.code)
+              print(error.read().decode())
+              raise
           PY
