@@ -1,7 +1,8 @@
 **Infernal Soul**
 
-state: working
+state: 🟠
 ver: Prototype
+online: no function
 
 
 
