@@ -1,0 +1,67 @@
+name: Notificar cambios .md a Discord
+
+on:
+  push:
+    paths:
+      - '**.md'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: discord-notify
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enviar o editar mensaje en Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PUSHER: ${{ github.actor }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Lista de archivos .md agregados o modificados en el push
+          FILES=$(jq -r '[.commits[]?.added[]?, .commits[]?.modified[]?] | unique | map(select(endswith(".md"))) | map("• `" + . + "`") | join("\n")' "$GITHUB_EVENT_PATH")
+
+          CONTENT=$(printf "Hai\n**%s**: cambios en archivos .md por %s:\n%s" "$REPO" "$PUSHER" "$FILES")
+          CONTENT=$(printf "%s" "$CONTENT" | head -c 2000)
+          BODY=$(jq -n --arg c "$CONTENT" '{content: $c}')
+
+          MSG_ID=""
+          if [ -f message_id.txt ]; then
+            MSG_ID=$(tr -d '[:space:]' < message_id.txt)
+          fi
+
+          CODE=0
+          # 2da vez en adelante: editar el mensaje existente
+          if [ -n "$MSG_ID" ]; then
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH \
+              -H "Content-Type: application/json" -d "$BODY" \
+              "$WEBHOOK/messages/$MSG_ID")
+          fi
+
+          # 1ra vez, o si el mensaje fue borrado: crear uno nuevo y guardar su ID
+          if [ "$CODE" != "200" ]; then
+            RESP=$(curl -s -X POST -H "Content-Type: application/json" \
+              -d "$BODY" "$WEBHOOK?wait=true")
+            NEW_ID=$(echo "$RESP" | jq -r '.id')
+            if [ -z "$NEW_ID" ] || [ "$NEW_ID" = "null" ]; then
+              echo "Error al enviar a Discord: $RESP"
+              exit 1
+            fi
+            echo "$NEW_ID" > message_id.txt
+            echo "Mensaje nuevo creado: $NEW_ID"
+          else
+            echo "Mensaje editado: $MSG_ID"
+          fi
+
+      - name: Guardar ID del mensaje en el repositorio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add message_id.txt
+          git diff --cached --quiet || (git commit -m "Actualizar ID de mensaje de Discord [skip ci]" && git push)
