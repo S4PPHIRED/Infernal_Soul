@@ -1,15 +1,15 @@
-name: Notificar cambios .md a Discord
+name: GAME STATUS a Discord
 
 on:
   push:
     paths:
-      - 'GameVer.md'
+      - '**.md'
 
 permissions:
   contents: write
 
 concurrency:
-  group: discord-notify
+  group: discord-game-status
   cancel-in-progress: false
 
 jobs:
@@ -18,22 +18,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Enviar o editar mensaje en Discord
+      - name: Enviar o editar mensaje
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PUSHER: ${{ github.actor }}
-          REPO: ${{ github.repository }}
         run: |
           # Lista de archivos .md agregados o modificados en el push
-          FILES=$(jq -r '[.commits[]?.added[]?, .commits[]?.modified[]?] | unique | map(select(endswith(".md"))) | map("• `" + . + "`") | join("\n")' "$GITHUB_EVENT_PATH")
+          jq -r '[.commits[]?.added[]?, .commits[]?.modified[]?] | unique | map(select(endswith(".md"))) | .[]' "$GITHUB_EVENT_PATH" > /tmp/files.txt
 
-          CONTENT=$(printf "\n**%s**:GAME STATUS [updated live] %s:\n%s" "$REPO" "$PUSHER" "$FILES")
-          CONTENT=$(printf "%s" "$CONTENT" | head -c 2000)
-          BODY=$(jq -n --arg c "$CONTENT" '{content: $c}')
+          if [ ! -s /tmp/files.txt ]; then
+            echo "No hubo cambios en .md"
+            exit 0
+          fi
+
+          # Armar el contenido: título + contenido de cada .md cambiado
+          : > /tmp/content.txt
+          echo "**GAME STATUS** [updated live]" >> /tmp/content.txt
+          echo "" >> /tmp/content.txt
+          while IFS= read -r f; do
+            if [ -f "$f" ]; then
+              cat "$f" >> /tmp/content.txt
+              echo "" >> /tmp/content.txt
+            fi
+          done < /tmp/files.txt
+
+          # Discord acepta máximo 2000 caracteres
+          head -c 1900 /tmp/content.txt > /tmp/content_cut.txt
+          BODY=$(jq -Rs '{content: .}' /tmp/content_cut.txt)
 
           MSG_ID=""
-          if [ -f message_id.txt ]; then
-            MSG_ID=$(tr -d '[:space:]' < message_id.txt)
+          if [ -f game_status_message_id.txt ]; then
+            MSG_ID=$(tr -d '[:space:]' < game_status_message_id.txt)
           fi
 
           CODE=0
@@ -44,7 +58,7 @@ jobs:
               "$WEBHOOK/messages/$MSG_ID")
           fi
 
-          # 1ra vez, o si el mensaje fue borrado: crear uno nuevo y guardar su ID
+          # 1ra vez, o si el mensaje fue borrado: crear uno nuevo
           if [ "$CODE" != "200" ]; then
             RESP=$(curl -s -X POST -H "Content-Type: application/json" \
               -d "$BODY" "$WEBHOOK?wait=true")
@@ -53,7 +67,7 @@ jobs:
               echo "Error al enviar a Discord: $RESP"
               exit 1
             fi
-            echo "$NEW_ID" > message_id.txt
+            echo "$NEW_ID" > game_status_message_id.txt
             echo "Mensaje nuevo creado: $NEW_ID"
           else
             echo "Mensaje editado: $MSG_ID"
@@ -63,5 +77,5 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add message_id.txt
-          git diff --cached --quiet || (git commit -m "Actualizar ID de mensaje de Discord [skip ci]" && git push)
+          git add game_status_message_id.txt
+          git diff --cached --quiet || (git commit -m "Actualizar ID de mensaje GAME STATUS [skip ci]" && git push)
