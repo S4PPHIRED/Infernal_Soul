@@ -1,14 +1,13 @@
-
-**Infernal Soul**🔨
-
-state: 🟠
-version: ``Prototype``
-created: ``2-08-26``
-online: ``no function``
-
-...
-[ new projects, coming soon]
-
-
+🟠 │ **INFERNAL SOUL** 
+```diff
++ VERSION: Prototype - Demo
++ STATUS: In Development
+- ONLINE: Unavailable
+```
+  -version summary-
+  ``•Test launch 
+  •graphics currently 32 pixels
+  •First boss of the game and much more...``
 
 
+[ COMING SOON ]
