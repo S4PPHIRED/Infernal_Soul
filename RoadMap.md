@@ -14,4 +14,4 @@ and when you fight bosses, you can be in a hit and run mode or boss rush mode.  
 
 # VERSION 1.0 (BIG LAUNCH!!)
 ## What will it bring that's new?
-.
+
