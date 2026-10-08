@@ -2,12 +2,12 @@
 ```diff
 + VERSION: Prototype - Demo
 + STATUS: In Development
-- ONLINE: Unavailable
+- MULTIPLAYER: Unavailable
 ```
-  -version summary-
-`•Test launch 
+  **-version summary-**
+```•Test launch 
 •graphics currently 32 pixels
-•First boss of the game and much more...`
+•First boss of the game and much more...```
 
 
 [ COMING SOON ]
