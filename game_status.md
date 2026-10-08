@@ -1,8 +1,10 @@
-**Infernal Soul**
+
+**Infernal Soul**🔨
 
 state: 🟠
-ver: Prototype
-online: no function
+ver: ``Prototype``
+online: ``no function``
+
 
 
 
