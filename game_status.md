@@ -2,7 +2,8 @@
 **Infernal Soul**🔨
 
 state: 🟠
-ver: ``Prototype``
+version: ``Prototype``
+created: ``2-08-26``
 online: ``no function``
 
 ...
