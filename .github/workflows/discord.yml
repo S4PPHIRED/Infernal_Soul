@@ -13,5 +13,6 @@ jobs:
       - name: Enviar mensaje a Discord
         run: |
           curl -H "Content-Type: application/json" \
-          -d '{"content":"📢 New edition in GitHub!"}' \
+          -d '{"content":"📢 New edition in GitHub!
+           https://github.com/S4PPHIRED/Infernal_Soul/blob/main/RoadMap.md"}' \
           "${{ secrets.DISCORD_ROADMAP_UPDATE }}"
