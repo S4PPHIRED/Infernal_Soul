@@ -27,7 +27,7 @@ jobs:
           # Lista de archivos .md agregados o modificados en el push
           FILES=$(jq -r '[.commits[]?.added[]?, .commits[]?.modified[]?] | unique | map(select(endswith(".md"))) | map("• `" + . + "`") | join("\n")' "$GITHUB_EVENT_PATH")
 
-          CONTENT=$(printf "Hai\n**%s**: cambios en archivos .md por %s:\n%s" "$REPO" "$PUSHER" "$FILES")
+          CONTENT=$(printf "\n**%s**:GAME STATUS [updated live] %s:\n%s" "$REPO" "$PUSHER" "$FILES")
           CONTENT=$(printf "%s" "$CONTENT" | head -c 2000)
           BODY=$(jq -n --arg c "$CONTENT" '{content: $c}')
 
