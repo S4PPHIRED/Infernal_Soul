@@ -10,9 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Enviar mensaje a Discord
+      - name: Send message to Discord
         run: |
           curl -H "Content-Type: application/json" \
-          -d '{"content":"📢 New edition in GitHub!
-           https://github.com/S4PPHIRED/Infernal_Soul/blob/main/RoadMap.md"}' \
+          -d '{"content":"📢 **New Version changes!**\n\n[View RoadMap](https://github.com/S4PPHIRED/Infernal_Soul/blob/main/RoadMap.md)"}' \
           "${{ secrets.DISCORD_ROADMAP_UPDATE }}"
