@@ -3,7 +3,7 @@ name: Notificar cambios .md a Discord
 on:
   push:
     paths:
-      - '**.md'
+      - 'GameVer.md'
 
 permissions:
   contents: write
