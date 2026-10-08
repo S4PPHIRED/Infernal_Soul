@@ -3,7 +3,7 @@ name: Discord Update
 on:
   push:
     paths:
-      - "README.md"
+      - "RoadMap.md"
 
 jobs:
   discord:
