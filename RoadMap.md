@@ -11,3 +11,7 @@ This will be the first version to be released!
 
 •Its fighting style is inspired by games like Metal Slug and Cuphead; for now, it will only be a platformer
 and when you fight bosses, you can be in a hit and run mode or boss rush mode.   :⁠^)
+
+# VERSION 1.0 (BIG LAUNCH!!)
+## What will it bring that's new?
+...
