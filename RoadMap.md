@@ -17,3 +17,5 @@ and when you fight bosses, you can be in a hit and run mode or boss rush mode.  
 •Major global launch
 
 •accounting and record function
+
+•official economy
