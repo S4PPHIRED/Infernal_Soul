@@ -11,4 +11,5 @@
 •First boss of the game and much more...```
 
 
-[ COMING SOON ]
+
+[ COMING SOON ...]
