@@ -1,7 +1,7 @@
 # PROTOTYPE VERSION - DEMO
 This will be the first version to be released!
 ## What does it include?
-•Introduction level 0
+•Introduction level 
 
 •After passing the introduction level you will go to level 1
 
@@ -14,6 +14,8 @@ and when you fight bosses, you can be in a hit and run mode or boss rush mode.  
 
 # VERSION 1.5 (BIG LAUNCH!!)
 ## What will it bring that's new?
+•The game will be built from scratch and will be designed for mobile devices and computers.
+
 •Major global launch
 
 •accounting and record function
