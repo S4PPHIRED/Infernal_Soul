@@ -20,7 +20,7 @@ jobs:
           WEBHOOK: ${{ secrets.DISCORD_ROADMAP_UPDATE }}
         run: |
           # Discord acepta máximo 2000 caracteres por mensaje
-          HEADER="📢 **Roadmap actualizado**"$'\n\n'
+          HEADER="# ** TRIVIA **"$'\n\n'
           BODY=$(head -c 1900 RoadMap.md)
           jq -n --arg c "$HEADER$BODY" '{content: $c}' > /tmp/payload.json
 
