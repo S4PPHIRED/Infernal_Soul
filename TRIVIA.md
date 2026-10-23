@@ -1,4 +1,4 @@
-# RATE US - CALIFICANOS
+# RATE US - CALIFICANOS:
 1️⃣ =⭐
 2️⃣ =⭐⭐
 3️⃣ =⭐⭐⭐
