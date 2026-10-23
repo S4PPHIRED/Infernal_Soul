@@ -21,3 +21,4 @@ and when you fight bosses, you can be in a hit and run mode or boss rush mode.  
 •accounting and record function
 
 •official economy
+and more.
