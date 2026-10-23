@@ -21,7 +21,7 @@ jobs:
         run: |
           # Discord acepta máximo 2000 caracteres por mensaje
           HEADER="# ** TRIVIA **"$'\n\n'
-          BODY=$(head -c 1900 RoadMap.md)
+          BODY=$(head -c 1900 TRIVIA.md)
           jq -n --arg c "$HEADER$BODY" '{content: $c}' > /tmp/payload.json
 
           curl -s -o /dev/null -w "HTTP %{http_code}\n" \
