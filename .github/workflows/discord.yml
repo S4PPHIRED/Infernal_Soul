@@ -5,13 +5,25 @@ on:
     paths:
       - "RoadMap.md"
 
+permissions:
+  contents: read
+
 jobs:
   discord:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send message to Discord
+      - uses: actions/checkout@v4
+
+      - name: Send RoadMap to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_ROADMAP_UPDATE }}
         run: |
-          curl -H "Content-Type: application/json" \
-          -d '{"content":"📢 **New Version changes!**\n\n[View RoadMap](https://github.com/S4PPHIRED/Infernal_Soul/blob/main/RoadMap.md)"}' \
-          "${{ secrets.DISCORD_ROADMAP_UPDATE }}"
+          # Discord acepta máximo 2000 caracteres por mensaje
+          HEADER="📢 **Roadmap actualizado**"$'\n\n'
+          BODY=$(head -c 1900 RoadMap.md)
+          jq -n --arg c "$HEADER$BODY" '{content: $c}' > /tmp/payload.json
+
+          curl -s -o /dev/null -w "HTTP %{http_code}\n" \
+            -H "Content-Type: application/json" \
+            -d @/tmp/payload.json "$WEBHOOK"
