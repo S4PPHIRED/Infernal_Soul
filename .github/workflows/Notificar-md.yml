@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: discord-game-status
@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Enviar o editar mensaje
+      - name: Enviar mensaje nuevo
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
@@ -28,45 +28,23 @@ jobs:
             exit 1
           fi
 
-          # Discord acepta máximo 2000 caracteres
-          head -c 1900 game_status.md > /tmp/content.txt
-          BODY=$(jq -Rs '{content: .}' /tmp/content.txt)
+          jq -Rs --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{
+            embeds: [{
+              author: { name: "🗺️ Roadmap del proyecto" },
+              title: "🎮 GAME STATUS",
+              description: .[0:4000],
+              color: 5793266,
+              footer: { text: "Actualización publicada desde GitHub" },
+              timestamp: $ts
+            }]
+          }' game_status.md > /tmp/payload.json
 
-          MSG_ID=""
-          if [ -f game_status_message_id.txt ]; then
-            MSG_ID=$(tr -d '[:space:]' < game_status_message_id.txt)
-          fi
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -d @/tmp/payload.json "$WEBHOOK")
 
-          CODE=0
-          # 2da vez en adelante: editar el mensaje existente
-          if [ -n "$MSG_ID" ]; then
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH \
-              -H "Content-Type: application/json" -d "$BODY" \
-              "$WEBHOOK/messages/$MSG_ID")
+          if [ "$CODE" != "204" ] && [ "$CODE" != "200" ]; then
+            echo "Error al enviar a Discord: HTTP $CODE"
+            exit 1
           fi
-
-          # 1ra vez, o si el mensaje fue borrado: crear uno nuevo
-          if [ "$CODE" != "200" ]; then
-            RESP=$(curl -s -X POST -H "Content-Type: application/json" \
-              -d "$BODY" "$WEBHOOK?wait=true")
-            NEW_ID=$(echo "$RESP" | jq -r '.id')
-            if [ -z "$NEW_ID" ] || [ "$NEW_ID" = "null" ]; then
-              echo "Error al enviar a Discord: $RESP"
-              exit 1
-            fi
-            echo "$NEW_ID" > game_status_message_id.txt
-            echo "Mensaje nuevo creado: $NEW_ID"
-          else
-            echo "Mensaje editado: $MSG_ID"
-          fi
-
-      - name: Guardar ID del mensaje en el repositorio
-        run: |
-          if [ ! -f game_status_message_id.txt ]; then
-            echo "No hay ID nuevo que guardar"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add game_status_message_id.txt
-          git diff --cached --quiet || (git commit -m "Actualizar ID de mensaje GAME STATUS [skip ci]" && git push)
+          echo "Anuncio publicado"
