@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: discord-game-status
@@ -19,11 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Editar mensaje de GAME STATUS
+      - name: Editar o crear mensaje en Discord
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          MSG_ID: "1557643892520648806"
         run: |
+          set -e
+          ID_FILE="discord_message_id.txt"
+
           if [ ! -f game_status.md ]; then
             echo "No existe game_status.md"
             exit 1
@@ -40,15 +42,45 @@ jobs:
             }]
           }' game_status.md > /tmp/payload.json
 
-          CODE=$(curl -s -o /tmp/resp.json -w "%{http_code}" -X PATCH \
-            -H "Content-Type: application/json" \
-            -d @/tmp/payload.json \
-            "$WEBHOOK/messages/$MSG_ID")
-
-          echo "PATCH HTTP $CODE"
-          if [ "$CODE" != "200" ]; then
-            echo "Error al editar el mensaje (HTTP $CODE)"
-            cat /tmp/resp.json
-            exit 1
+          MSG_ID=""
+          if [ -f "$ID_FILE" ]; then
+            MSG_ID=$(grep -oE '[0-9]{17,20}' "$ID_FILE" | head -n1 || true)
           fi
-          echo "Mensaje editado correctamente"
+
+          CODE=""
+          if [ -n "$MSG_ID" ]; then
+            CODE=$(curl -s -o /tmp/resp.json -w "%{http_code}" -X PATCH \
+              -H "Content-Type: application/json" \
+              -d @/tmp/payload.json \
+              "$WEBHOOK/messages/$MSG_ID")
+            echo "PATCH HTTP $CODE"
+          fi
+
+          if [ "$CODE" = "200" ]; then
+            echo "Mensaje editado: $MSG_ID"
+          else
+            # No hay ID, o el mensaje fue borrado (404): crear uno nuevo
+            CODE=$(curl -s -o /tmp/resp.json -w "%{http_code}" -X POST \
+              -H "Content-Type: application/json" \
+              -d @/tmp/payload.json \
+              "$WEBHOOK?wait=true")
+            echo "POST HTTP $CODE"
+            if [ "$CODE" != "200" ]; then
+              echo "Error al crear mensaje"
+              cat /tmp/resp.json
+              exit 1
+            fi
+            NEW_ID=$(jq -r '.id' /tmp/resp.json)
+            echo "$NEW_ID" > "$ID_FILE"
+            echo "Mensaje nuevo creado: $NEW_ID"
+          fi
+
+      - name: Guardar ID en el repo si cambió
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add discord_message_id.txt
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: actualizar ID del mensaje de Discord"
+            git push
+          fi
