@@ -19,9 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Enviar mensaje nuevo
+      - name: Editar mensaje de GAME STATUS
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MSG_ID: "1557643892520648806"
         run: |
           if [ ! -f game_status.md ]; then
             echo "No existe game_status.md"
@@ -39,12 +40,15 @@ jobs:
             }]
           }' game_status.md > /tmp/payload.json
 
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+          CODE=$(curl -s -o /tmp/resp.json -w "%{http_code}" -X PATCH \
             -H "Content-Type: application/json" \
-            -d @/tmp/payload.json "$WEBHOOK")
+            -d @/tmp/payload.json \
+            "$WEBHOOK/messages/$MSG_ID")
 
-          if [ "$CODE" != "204" ] && [ "$CODE" != "200" ]; then
-            echo "Error al enviar a Discord: HTTP $CODE"
+          echo "PATCH HTTP $CODE"
+          if [ "$CODE" != "200" ]; then
+            echo "Error al editar el mensaje (HTTP $CODE)"
+            cat /tmp/resp.json
             exit 1
           fi
-          echo "Anuncio publicado"
+          echo "Mensaje editado correctamente"
