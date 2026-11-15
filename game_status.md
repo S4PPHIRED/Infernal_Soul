@@ -1,6 +1,6 @@
 # 🟠 │ **INFERNAL SOUL** 
 ```diff
-+ VERSION: Prototype - Demo
++ VERSION: Prototype
 - STATUS: In development 🔨
 - MULTIPLAYER: Not available
 
