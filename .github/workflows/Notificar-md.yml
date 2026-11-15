@@ -33,7 +33,7 @@ jobs:
 
           jq -Rs --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{
             embeds: [{
-              author: { name: "🗺️ Roadmap del proyecto" },
+              author: { name: "ESTADO DE JUEGOS EN VIVO 💡" },
               title: "🎮 GAME STATUS",
               description: .[0:4000],
               color: 5793266,
